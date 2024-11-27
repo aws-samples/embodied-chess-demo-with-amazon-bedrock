@@ -1,0 +1,57 @@
+{
+  "targetArn": "arn:aws:iot:us-west-2:xxxxxxxxxxxx:thing/CoreDevice_1",
+  "deploymentName": "ChessGameManager_Deployment",
+  "components": {
+    "aws.greengrass.Nucleus": {
+      "componentVersion": "2.13.0",
+      "configurationUpdate": {
+        "merge": "{\"interpolateComponentConfiguration\":true}"
+      }
+    },
+    "aws.greengrass.Cli": {
+      "componentVersion": "2.13.0"
+    },
+    "aws.greengrass.clientdevices.Auth": {
+      "componentVersion": "2.5.1",
+      "configurationUpdate": {
+        "merge": "{\"deviceGroups\":{\"formatVersion\":\"2021-03-05\",\"definitions\":{\"MyPermissiveDeviceGroup\":{\"selectionRule\":\"thingName: *\",\"policyName\":\"MyPermissivePolicy\"}},\"policies\":{\"MyPermissivePolicy\":{\"AllowAll\":{\"statementDescription\":\"Allow client devices to perform all actions.\",\"operations\":[\"*\"],\"resources\":[\"*\"]}}}},\"certificates\":{\"serverCertificateValiditySeconds\":\"864000\"},\"security\":{\"clientDeviceTrustDurationMinutes\":\"1800000\"}}"
+      }
+    },
+    "aws.greengrass.clientdevices.mqtt.Moquette": {
+      "componentVersion": "2.3.7"
+    },
+    "aws.greengrass.clientdevices.IPDetector": {
+      "componentVersion": "2.2.0"
+    },
+    "aws.greengrass.clientdevices.mqtt.Bridge": {
+      "componentVersion": "2.3.2",
+      "configurationUpdate": {
+        "merge": "{\"mqttTopicMapping\":{\"CloudRequestorToLocalBrokerMapping\":{\"topic\":\"robo-chess/cloud/request\",\"source\":\"IotCore\",\"target\":\"Pubsub\"},\"CloudRequestorResponsesToIotCoreMapping\":{\"topic\":\"robo-chess/cloud/response\",\"source\":\"Pubsub\",\"target\":\"IotCore\"},\"BoardStartRequestsToLocalBrokerMapping\":{\"topic\":\"robo-chess/devices/board/start\",\"source\":\"Pubsub\",\"target\":\"LocalMqtt\"},\"BoardStartRequestsToIoTCoreMapping\":{\"topic\":\"robo-chess/devices/board/start\",\"source\":\"Pubsub\",\"target\":\"IotCore\"},\"BoardStartResponsesFromCloudToIpcMapping\":{\"topic\":\"robo-chess/devices/board/start/response\",\"source\":\"IotCore\",\"target\":\"Pubsub\"},\"BoardStartResponsesToIpcMapping\":{\"topic\":\"robo-chess/devices/board/start/response\",\"source\":\"LocalMqtt\",\"target\":\"Pubsub\"},\"BoardStartResponsesToIotCoreMapping\":{\"topic\":\"robo-chess/devices/board/start/response\",\"source\":\"LocalMqtt\",\"target\":\"IotCore\"},\"BoardValidationRequestsToLocalBrokerMapping\":{\"topic\":\"robo-chess/devices/board/validate\",\"source\":\"Pubsub\",\"target\":\"LocalMqtt\"},\"BoardValidationResponsesFromCloudToIpcMapping\":{\"topic\":\"robo-chess/devices/board/validate/response\",\"source\":\"IotCore\",\"target\":\"Pubsub\"},\"BoardValidationResponsesToIpcMapping\":{\"topic\":\"robo-chess/devices/board/validate/response\",\"source\":\"LocalMqtt\",\"target\":\"Pubsub\"},\"BoardValidationResponsesToIotCoreMapping\":{\"topic\":\"robo-chess/devices/board/validate/response\",\"source\":\"LocalMqtt\",\"target\":\"IotCore\"},\"BoardProcessedResponsesFromCloudToIpcMapping\":{\"topic\":\"robo-chess/devices/board/processed\",\"source\":\"IotCore\",\"target\":\"Pubsub\"},\"BoardProcessedResponsesToIpcMapping\":{\"topic\":\"robo-chess/devices/board/processed\",\"source\":\"LocalMqtt\",\"target\":\"Pubsub\"},\"BoardProcessedResponsesToIotCoreMapping\":{\"topic\":\"robo-chess/devices/board/processed\",\"source\":\"LocalMqtt\",\"target\":\"IotCore\"},\"ConfigShadowsLocalMqttToPubsub\":{\"topic\":\"$aws/things/Tom_RO1/shadow/name/config/#\",\"source\":\"LocalMqtt\",\"target\":\"Pubsub\"},\"ConfigShadowsPubsubToLocalMqtt\":{\"topic\":\"$aws/things/Tom_RO1/shadow/name/config/#\",\"source\":\"Pubsub\",\"target\":\"LocalMqtt\"},\"ControlShadowsLocalMqttToPubsub\":{\"topic\":\"$aws/things/Tom_RO1/shadow/name/controls/#\",\"source\":\"LocalMqtt\",\"target\":\"Pubsub\"},\"ControlShadowsPubsubToLocalMqtt\":{\"topic\":\"$aws/things/Tom_RO1/shadow/name/controls/#\",\"source\":\"Pubsub\",\"target\":\"LocalMqtt\"}}}"
+      }
+    },
+    "aws.greengrass.ShadowManager": {
+      "componentVersion": "2.3.9",
+      "configurationUpdate": {
+        "merge": "{\"strategy\":{\"type\":\"realTime\"},\"synchronize\":{\"coreThing\":{\"classic\":false,\"namedShadows\":[\"CoreDevice_1\"]},\"direction\":\"betweenDeviceAndCloud\"}}"
+      }
+    },
+    "aws.greengrass.LogManager": {
+      "componentVersion": "2.3.8",
+      "configurationUpdate": {
+        "merge": "{\"logsUploaderConfiguration\":{\"systemLogsConfiguration\":{\"uploadToCloudWatch\":\"true\",\"minimumLogLevel\":\"INFO\",\"deleteLogFileAfterCloudUpload\":\"false\"},\"componentLogsConfigurationMap\":{\"com.amazon.aws.ChessGameManager\":{\"minimumLogLevel\":\"DEBUG\",\"logFileDirectoryPath\":\"/home/ggc_user/logs\",\"logFileRegex\":\"ChessGameManager\\\\w*.log\",\"deleteLogFileAfterCloudUpload\":\"false\"}}},\"periodicUploadIntervalSec\":\"10\",\"deprecatedVersionSupport\":\"false\"}"
+      }
+    },
+    "com.amazon.aws.ChessGameManager": {
+      "componentVersion": "1.0.8",
+      "configurationUpdate": {
+        "merge": "{\"robotEnabled\":false}"
+      }
+    },
+    "aws.greengrass.LocalDebugConsole": {
+      "componentVersion": "2.4.3",
+      "configurationUpdate": {
+        "merge": "{\"httpsEnabled\": false}"
+      }
+    }
+  }
+}

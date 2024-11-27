@@ -1,0 +1,6 @@
+{
+  "license": "MIT",
+  "dependencies": {
+    "chessjs": "^0.0.1"
+  }
+}

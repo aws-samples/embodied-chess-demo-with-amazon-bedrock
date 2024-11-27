@@ -1,0 +1,63 @@
+/* The path depends on the current location of the scss file */
+// @import "../../node_modules/@chatscope/chat-ui-kit-styles/themes/default/variables";
+
+// Here you can override variables from the imported file above. Check its source for a list of available variables
+
+// Colors
+$squid-ink: rgb(35, 47, 62);
+$night-purple: rgb(13, 39, 86);
+$ligh-purple: rgb(118, 56, 250);
+$cyan: rgb(62, 141, 255);
+$light-cyan: rgb(187, 248, 255);
+
+$ui-light-purple: rgb(109, 98, 224);
+$ui-dark-purple: rgb(38, 35, 75);
+$ui-darker-purple: #040724;
+$ui-grey-purple: rgb(32, 61, 110);
+
+$ui-border-light-purple: rgb(246, 196, 69);
+
+// MessageList
+$message-list-bg-color: $ui-darker-purple;
+
+// Message Incoming
+$message-content-incoming-bg-color: $ui-dark-purple;
+$message-content-incoming-color: white;
+
+// Message Outgoing
+$message-content-outgoing-bg-color: $ui-light-purple;
+$message-content-outgoing-color: white;
+
+// Typing Indicator
+$typing-indicator-text-color: white;
+$typing-indicator-text-bg-color: $ui-darker-purple;
+$message-list-typing-indicator-bg-color: $ui-darker-purple;
+
+// Message Input
+$chat-container-message-input-bg-color: $night-purple;
+$message-input-content-editor-bg-color: $ui-grey-purple;
+$message-input-content-editor-color: white;
+$message-input-content-editor-wrapper-bg-color: $ui-grey-purple;
+
+$message-input-content-editor-disabled-bg-color: $night-purple;
+$message-input-content-editor-disabled-color: white;
+
+$message-input-placeholder-color: white;
+
+$message-content-font-family: "Thasadith", "sans-serif";
+$message-content-font-weight: 600;
+
+$conversation-font-family: "Thasadith", "sans-serif";
+$conversation-font-weight: 600;
+
+$sidebar-left-bg-color: $ui-darker-purple;
+$conversation-bg-color: $ui-darker-purple;
+$conversation-name-color: white;
+$conversation-name-font-size: 5em;
+
+$conversation-hover-bg-color: $night-purple;
+
+$main-container-conversation-list-border-right: solid 1px
+  $ui-border-light-purple;
+
+@import "../../node_modules/@chatscope/chat-ui-kit-styles/themes/default/main";

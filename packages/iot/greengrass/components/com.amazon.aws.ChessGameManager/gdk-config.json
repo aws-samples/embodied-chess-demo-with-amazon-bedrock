@@ -1,0 +1,16 @@
+{
+  "component": {
+    "com.amazon.aws.ChessGameManager": {
+      "author": "Amazon",
+      "version": "NEXT_PATCH",
+      "build": {
+        "build_system": "zip"
+      },
+      "publish": {
+        "bucket": "robochess-iot-gdk-artifacts",
+        "region": "us-west-2"
+      }
+    }
+  },
+  "gdk_version": "1.0.0"
+}

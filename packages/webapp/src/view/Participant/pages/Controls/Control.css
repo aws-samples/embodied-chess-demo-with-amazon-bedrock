@@ -1,0 +1,5 @@
+@keyframes blinkingBackground {
+  100% {
+    background-color: rgb(255, 174, 66);
+  }
+}

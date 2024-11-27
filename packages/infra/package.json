@@ -1,0 +1,29 @@
+{
+  "name": "infra",
+  "version": "1.0.0",
+  "license": "MIT",
+  "bin": {
+    "gen-ai-chess": "bin/gen-ai-chess.js"
+  },
+  "scripts": {
+    "cdk": "cdk",
+    "create-stockfish-binary": "cd lib/NestedStacks/StepFunction/lambdas/moveFunctions/stockfishLayer/bin && docker build --output=. ."
+  },
+  "devDependencies": {
+    "@types/node": "^22.9.3",
+    "aws-cdk": "^2.171.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.2"
+  },
+  "dependencies": {
+    "@aws-cdk/aws-amplify-alpha": "2.171.0-alpha.0",
+    "@aws-cdk/aws-cognito-identitypool-alpha": "2.171.0-alpha.0",
+    "@aws-cdk/aws-iot-actions-alpha": "2.171.0-alpha.0",
+    "@aws-cdk/aws-iot-alpha": "2.171.0-alpha.0",
+    "@aws-cdk/aws-lambda-python-alpha": "2.171.0-alpha.0",
+    "@cdklabs/generative-ai-cdk-constructs": "^0.1.285",
+    "aws-cdk-lib": "^2.171.0",
+    "constructs": "^10.4.2",
+    "esbuild": "^0.24.0"
+  }
+}

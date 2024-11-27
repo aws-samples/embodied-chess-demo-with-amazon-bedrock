@@ -1,0 +1,91 @@
+---
+RecipeFormatVersion: "2020-01-25"
+ComponentName: "com.amazon.aws.ChessGameManager"
+ComponentVersion: "1.0.0"
+ComponentDescription: "Chess Game Manager Component"
+ComponentPublisher: "Amazon"
+ComponentConfiguration:
+  DefaultConfiguration:
+    logFilePath: "/home/ggc_user/logs/ChessGameManager.log"
+    logLevel: "INFO"
+    gameRequestsTopic: "robo-chess/cloud/request"
+    gameResponsesTopic: "robo-chess/cloud/response"
+    boardValidationsTopic: "robo-chess/devices/board/validate"
+    boardValidationsResponseTopic: "robo-chess/devices/board/validate/response"
+    boardStartTopic: "robo-chess/devices/board/start"
+    boardStartResponseTopic: "robo-chess/devices/board/start/response"
+    boardProcessedTopic: "robo-chess/devices/board/processed"
+    robotControlMoveTopic: "robo-chess/devices/arm/move"
+    robotControlMoveResponseTopic: "robo-chess/devices/arm/move/response"
+    robotEnabled: true
+    coreDeviceMainNamedShadow: "{iot:thingName}"
+    accessControl:
+      aws.greengrass.ShadowManager:
+        "com.amazon.aws.ChessGameManager:shadow:1":
+          policyDescription: "Allow a group of core devices to interact with local shadows - Allows access to shadows"
+          operations:
+            - "aws.greengrass#GetThingShadow"
+            - "aws.greengrass#UpdateThingShadow"
+            - "aws.greengrass#DeleteThingShadow"
+          resources:
+            - $aws/things/{iot:thingName}/shadow
+            - $aws/things/{iot:thingName}/shadow/name/{iot:thingName}
+        "com.amazon.aws.ChessGameManager:shadow:2":
+          policyDescription: "Allow a group of core devices to interact with local shadows - Allows access to things with shadows"
+          operations:
+            - "aws.greengrass#ListNamedShadowsForThing"
+          resources:
+            - "{iot:thingName}"
+        "com.amazon.aws.ChessGameManager:shadow:3":
+          policyDescription: "Allow a group of core devices to interact with client device shadows - Allows access to shadows"
+          operations:
+            - "aws.greengrass#GetThingShadow"
+            - "aws.greengrass#UpdateThingShadow"
+            - "aws.greengrass#DeleteThingShadow"
+          resources:
+            - $aws/things/*/shadow
+            - $aws/things/SmartBoard_1/shadow/name/*
+        "com.amazon.aws.ChessGameManager:shadow:4":
+          policyDescription: "Allow a group of core devices to interact with client device shadows - Allows access to things with shadows"
+          operations:
+            - "aws.greengrass#ListNamedShadowsForThing"
+          resources:
+            - "*"
+      aws.greengrass.ipc.mqttproxy:
+        "com.amazon.aws.ChessGameManager:mqttproxy:1":
+          policyDescription: "Allow access to subscribe to any topic"
+          operations:
+            - "aws.greengrass#SubscribeToIoTCore"
+          resources:
+            - "*"
+        "com.amazon.aws.ChessGameManager:mqttproxy:2":
+          policyDescription: "Allow access to publish to any topic"
+          operations:
+            - "aws.greengrass#PublishToIoTCore"
+          resources:
+            - "*"
+      aws.greengrass.ipc.pubsub:
+        "com.amazon.aws.ChessGameManager:pubsub:1":
+          policyDescription: "Allow access to subscribe to any topic"
+          operations:
+            - "aws.greengrass#SubscribeToTopic"
+          resources:
+            - "*"
+        "com.amazon.aws.ChessGameManager:pubsub:2":
+          policyDescription: "Allow access to publish to any topic"
+          operations:
+            - "aws.greengrass#PublishToTopic"
+          resources:
+            - "*"
+Manifests:
+  - Platform:
+      os: "linux"
+    Artifacts:
+      - URI: "s3://genai-chess-iot-gdk-artifacts/com.amazon.aws.ChessGameManager/1.0.0/com.amazon.aws.ChessGameManager.zip"
+        Unarchive: ZIP
+    Lifecycle:
+      Install:
+        Timeout: 60,
+        Script: "python3 -m pip install boto3 awsiotsdk retry --break-system-packages"
+      Run:
+        Script: "python3 -u {artifacts:decompressedPath}/com.amazon.aws.ChessGameManager/main.py"

@@ -1,0 +1,9 @@
+{
+  "targetArn": "arn:aws:iot:us-west-2:xxxxxxxxxxxx:thing/CoreDevice_1",
+  "deploymentName": "Empty_Deployment",
+  "components": {
+    "aws.greengrass.Cli": {
+      "componentVersion": "2.13.0"
+    }
+  }
+}

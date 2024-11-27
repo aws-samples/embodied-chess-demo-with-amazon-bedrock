@@ -1,0 +1,6 @@
+boto3
+chess
+requests
+requests-aws4auth
+stockfish
+pydash

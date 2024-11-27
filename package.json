@@ -1,0 +1,15 @@
+{
+  "name": "embodied-chess-demo-with-amazon-bedrock",
+  "version": "1.0.0",
+  "author": "Patrick O'Connor <ocopatr@amazon.com>",
+  "description": "Deploy a virtual or robot arm controlled game of chess using AWS AI/IoT services.",
+  "license": "Apache-2.0",
+  "scripts": {
+    "dev": "pnpm --filter webapp dev",
+    "graphql": "pnpm --filter webapp graphql",
+    "cdk": "pnpm --filter infra cdk",
+    "create-stockfish-binary": "pnpm --filter infra create-stockfish-binary",
+    "deploy-virtual": "pnpm --filter infra cdk deploy",
+    "deploy-physical": "pnpm --filter infra cdk deploy -c iotDevice=true"
+  }
+}

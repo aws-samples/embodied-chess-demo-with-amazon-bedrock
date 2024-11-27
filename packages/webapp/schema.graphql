@@ -1,0 +1,182 @@
+type SessionRecord @aws_cognito_user_pools @aws_iam {
+  SessionID: ID!
+  SK: String
+  Type: String
+  TimeStamp: String
+  White: String
+  WhiteID: String
+  Black: String
+  BlackID: String
+  GameStatus: String
+  Error: String
+  Cause: String
+  BackgroundSrc: String
+}
+
+input CreateSessionInput {
+  SessionID: String!
+  White: String!
+  WhiteID: String
+  Black: String!
+  BlackID: String
+  BackgroundSrc: String
+}
+
+input UpdateSessionInput {
+  SessionID: String!
+  White: String
+  WhiteID: String
+  Black: String
+  BlackID: String
+  GameStatus: String
+  Error: String
+  Cause: String
+}
+
+input UpdateGameStatusInput {
+  SessionID: String!
+  GameStatus: String
+}
+
+input DeleteSessionInput {
+  SessionID: String!
+}
+
+type SessionConnection {
+  items: [SessionRecord]
+  nextToken: String
+}
+
+type MoveRecord @aws_cognito_user_pools @aws_iam {
+  SessionID: ID!
+  SK: String
+  Action: String
+  Move: String
+  MoveCount: Int
+  TimeStamp: String
+  GameWinner: String
+  SfnExecutionId: String
+  TaskToken: String
+  SanList: String
+  SuggestedMove: String
+}
+
+input HumanNewMoveInput {
+  SessionID: ID!
+  Action: String!
+  Move: String!
+}
+
+input UpdateLatestMoveInput {
+  SessionID: ID!
+  Action: String
+  Move: String
+  MoveCount: Int
+  GameWinner: String
+  SfnExecutionId: String
+  TaskToken: String
+  SanList: String
+  SuggestedMove: String
+}
+
+type Comment @aws_cognito_user_pools @aws_iam {
+  SessionID: ID!
+  SK: String
+  Comment: String
+  Author: String
+}
+
+input CreateCommentInput {
+  SessionID: ID!
+  Comment: String!
+  Author: String!
+}
+
+type MoveRecordConnection {
+  items: [MoveRecord]!
+  nextToken: String
+}
+
+type Query {
+  getSession(SessionID: ID!): SessionRecord
+  listActiveSessions(nextToken: String): SessionConnection
+
+  listGamesByMoveCount(nextToken: String): [MoveRecord]
+
+  getMoves(SessionID: ID!, limit: Int, nextToken: String): MoveRecordConnection
+
+  getLatestMove(SessionID: ID): MoveRecord
+
+  listComments(SessionID: ID!): [Comment]
+}
+
+type Mutation {
+  createSession(input: CreateSessionInput!): SessionRecord
+  updateSession(input: UpdateSessionInput!): SessionRecord
+    @aws_cognito_user_pools
+    @aws_iam
+  updateGameStatus(input: UpdateGameStatusInput!): SessionRecord
+    @aws_cognito_user_pools
+    @aws_iam
+  deleteSession(input: DeleteSessionInput!): SessionRecord
+  verifySession(SessionID: String!): Boolean
+
+  humanNewMove(input: HumanNewMoveInput!): MoveRecord
+  updateLatestMove(input: UpdateLatestMoveInput!): MoveRecord @aws_iam
+
+  createComment(input: CreateCommentInput!): Comment
+    @aws_cognito_user_pools
+    @aws_iam
+
+  postQuestion(
+    SessionID: ID!
+    Comment: String!
+    Author: String!
+    Board: String!
+    ModelID: String!
+  ): Comment
+}
+
+type Subscription {
+  onCreateSession(
+    SessionID: String
+    SK: String
+    Type: String
+    GameStatus: String
+  ): SessionRecord @aws_subscribe(mutations: ["createSession"])
+
+  onUpdateSession(SessionID: String, SK: String): SessionRecord
+    @aws_subscribe(mutations: ["updateSession"])
+
+  onUpdateGameStatus(
+    SessionID: String
+    SK: String
+    Type: String
+    GameStatus: String
+  ): SessionRecord @aws_subscribe(mutations: ["updateGameStatus"])
+
+  onDeleteSession(
+    SessionID: String
+    SK: String
+    Type: String
+    GameStatus: String
+  ): SessionRecord @aws_subscribe(mutations: ["deleteSession"])
+
+  onUpdateLatestMove(
+    SessionID: String
+    Action: String
+    Move: String
+    SK: String
+    SfnExecutionId: String
+  ): MoveRecord @aws_subscribe(mutations: ["updateLatestMove"])
+
+  onCreateComment(
+    SessionID: String
+    SK: String
+    Comment: String
+    Author: String
+  ): Comment @aws_subscribe(mutations: ["createComment"])
+
+  onPostQuestion(SessionID: String): Comment
+    @aws_subscribe(mutations: ["postQuestion"])
+}

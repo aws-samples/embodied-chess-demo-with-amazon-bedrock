@@ -1,0 +1,8 @@
+{
+  "license": "MIT",
+  "dependencies": {
+    "chessjs": "^0.0.1",
+    "isepic-chess": "^8.6.0",
+    "@aws-crypto/sha256-js": "^5.2.0"
+  }
+}
