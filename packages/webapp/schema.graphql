@@ -104,10 +104,10 @@ type Query {
   listGamesByMoveCount(nextToken: String): [MoveRecord]
 
   getMoves(SessionID: ID!, limit: Int, nextToken: String): MoveRecordConnection
-
   getLatestMove(SessionID: ID): MoveRecord
-
   listComments(SessionID: ID!): [Comment]
+
+  listUsers: AWSJSON
 }
 
 type Mutation {

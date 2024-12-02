@@ -33,9 +33,9 @@ export const EditSession = (props: IEditSession) => {
     try {
       await mutateAsync({
         sessionID: editSession.SessionID,
-        white: white.option,
+        white: white.option.value,
         whiteID: white.id?.value ?? white.id,
-        black: black.option,
+        black: black.option.value,
         blackID: black.id?.value ?? black.id,
       });
       setAlertStatus({

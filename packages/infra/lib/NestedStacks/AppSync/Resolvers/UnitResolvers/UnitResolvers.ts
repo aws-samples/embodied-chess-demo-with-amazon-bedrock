@@ -2,27 +2,47 @@ import * as cdk from "aws-cdk-lib";
 
 import * as iam from "aws-cdk-lib/aws-iam";
 import * as appsync from "aws-cdk-lib/aws-appsync";
+import * as cognito from "aws-cdk-lib/aws-cognito";
 
 import { Construct } from "constructs";
 
 interface IUnitResolvers {
   ddbDataSource: appsync.DynamoDbDataSource;
   graphqlApi: appsync.GraphqlApi;
+  userPool: cognito.UserPool;
 }
 
 export class UnitResolvers extends Construct {
   readonly ddbDataSource: appsync.DynamoDbDataSource;
   readonly graphqlApi: appsync.GraphqlApi;
+  readonly cognitoDataSource: appsync.HttpDataSource;
 
   constructor(
     scope: Construct,
     id: string,
-    { ddbDataSource, graphqlApi }: IUnitResolvers
+    { ddbDataSource, graphqlApi, userPool }: IUnitResolvers
   ) {
     super(scope, id);
 
     this.ddbDataSource = ddbDataSource;
     this.graphqlApi = graphqlApi;
+
+    this.cognitoDataSource = this.graphqlApi.addHttpDataSource(
+      "Cognito DS",
+      `https://cognito-idp.${cdk.Stack.of(this).region}.amazonaws.com`,
+      {
+        authorizationConfig: {
+          signingRegion: cdk.Stack.of(this).region,
+          signingServiceName: "cognito-idp",
+        },
+      }
+    );
+    this.cognitoDataSource.grantPrincipal.addToPrincipalPolicy(
+      new iam.PolicyStatement({
+        actions: ["cognito-idp:ListUsers"],
+        resources: [userPool.userPoolArn],
+      })
+    );
 
     /*************************************************************/
     /************************** Queries **************************/
@@ -31,6 +51,7 @@ export class UnitResolvers extends Construct {
     this.listActiveSessions();
     this.listGamesByMoveCount();
     this.listComments();
+    this.listUsers();
     this.getSession();
     this.getMoves();
     this.getLatestMove();
@@ -80,6 +101,19 @@ export class UnitResolvers extends Construct {
       code: appsync.Code.fromAsset(__dirname + `/${typeName}/${fieldName}.mjs`),
       runtime: appsync.FunctionRuntime.JS_1_0_0,
       dataSource: this.ddbDataSource,
+      fieldName,
+      typeName,
+    });
+  };
+
+  listUsers = () => {
+    const fieldName = "listUsers";
+    const typeName = "Query";
+
+    this.graphqlApi.createResolver(`${fieldName} Unit Resolver`, {
+      code: appsync.Code.fromAsset(__dirname + `/${typeName}/${fieldName}.mjs`),
+      runtime: appsync.FunctionRuntime.JS_1_0_0,
+      dataSource: this.cognitoDataSource,
       fieldName,
       typeName,
     });

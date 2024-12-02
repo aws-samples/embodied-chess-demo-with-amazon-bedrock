@@ -1,20 +1,17 @@
 import {
   useListFoundationModels,
   useListImportedModels,
+  useListUsers,
 } from "../../../api/queries";
 
-import {
-  chessEngineOptions,
-  gameOptions,
-  transformModelOptions,
-} from "../menuOptions";
+import { gameOptions, transformModelOptions } from "../menuOptions";
 
 import {
   Container,
   FormField,
-  Input,
   KeyValuePairs,
   Select,
+  Slider,
 } from "@cloudscape-design/components";
 
 import { Controller, UseFormReturn } from "react-hook-form";
@@ -36,11 +33,22 @@ export const PlayerConfiguration = (props: IPlayerConfiguration) => {
 
   const foundationModels = useListFoundationModels();
   const importedModels = useListImportedModels();
+  const listUsers = useListUsers();
 
   useEffect(() => {
     switch (option?.value) {
       case "player":
-        return resetField(`${field}.id`, { defaultValue: "" });
+        if (listUsers.data?.length) {
+          return resetField(`${field}.id`, {
+            defaultValue: {
+              label: listUsers.data[0],
+              value: listUsers.data[0],
+            },
+          });
+        }
+        return resetField(`${field}.id`, {
+          defaultValue: null,
+        });
       case "bedrock":
         return resetField(`${field}.id`, {
           defaultValue: {
@@ -61,9 +69,7 @@ export const PlayerConfiguration = (props: IPlayerConfiguration) => {
           defaultValue: null,
         });
       case "chessengine":
-        return resetField(`${field}.id`, {
-          defaultValue: chessEngineOptions[0],
-        });
+        return resetField(`${field}.id`, { defaultValue: 1500 });
       default:
         resetField(`${field}.id`, { defaultValue: "random" });
     }
@@ -85,6 +91,7 @@ export const PlayerConfiguration = (props: IPlayerConfiguration) => {
                   render={({ field: { onChange, value } }) => (
                     <FormField label="Type">
                       <Select
+                        disabled={isPending}
                         selectedOption={value}
                         onChange={({ detail }) =>
                           onChange(detail.selectedOption)
@@ -113,20 +120,27 @@ export const PlayerConfiguration = (props: IPlayerConfiguration) => {
                             value: true,
                           },
                         }}
-                        render={({
-                          field: { onChange, value },
-                          fieldState: { invalid, error },
-                        }) => (
-                          <FormField
-                            label="Username*"
-                            errorText={error?.message}
-                          >
-                            <Input
+                        render={({ field: { onChange, value } }) => (
+                          <FormField label="Username*">
+                            <Select
                               disabled={isPending}
-                              value={value}
-                              placeholder="Player email..."
-                              onChange={({ detail }) => onChange(detail.value)}
-                              invalid={invalid}
+                              filteringType="auto"
+                              selectedOption={value}
+                              onChange={({ detail }) =>
+                                onChange(detail.selectedOption)
+                              }
+                              statusType={
+                                foundationModels.isLoading
+                                  ? "loading"
+                                  : "finished"
+                              }
+                              options={listUsers.data.map((user) => {
+                                return {
+                                  label: user,
+                                  value: user,
+                                };
+                              })}
+                              loadingText="Loading users"
                             />
                           </FormField>
                         )}
@@ -146,6 +160,7 @@ export const PlayerConfiguration = (props: IPlayerConfiguration) => {
                           control={control}
                           render={({ field: { onChange, value } }) => (
                             <Select
+                              disabled={isPending}
                               filteringType="auto"
                               selectedOption={value}
                               onChange={({ detail }) =>
@@ -180,6 +195,7 @@ export const PlayerConfiguration = (props: IPlayerConfiguration) => {
                             control={control}
                             render={({ field: { onChange, value } }) => (
                               <Select
+                                disabled={isPending}
                                 selectedOption={value}
                                 onChange={({ detail }) =>
                                   onChange(detail.selectedOption)
@@ -214,17 +230,17 @@ export const PlayerConfiguration = (props: IPlayerConfiguration) => {
                   {
                     label: null,
                     value: (
-                      <FormField label={"Engine Level"}>
+                      <FormField label={"Engine Level (Elo level)"}>
                         <Controller
                           name={`${field}.id`}
                           control={control}
                           render={({ field: { onChange, value } }) => (
-                            <Select
-                              selectedOption={value}
-                              onChange={({ detail }) =>
-                                onChange(detail.selectedOption)
-                              }
-                              options={chessEngineOptions}
+                            <Slider
+                              disabled={isPending}
+                              onChange={({ detail }) => onChange(detail.value)}
+                              value={value}
+                              max={3000}
+                              min={100}
                             />
                           )}
                         />

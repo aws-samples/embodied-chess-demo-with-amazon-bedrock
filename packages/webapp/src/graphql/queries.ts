@@ -128,3 +128,7 @@ export const listComments = /* GraphQL */ `query ListComments($SessionID: ID!) {
   APITypes.ListCommentsQueryVariables,
   APITypes.ListCommentsQuery
 >;
+export const listUsers = /* GraphQL */ `query ListUsers {
+  listUsers
+}
+` as GeneratedQuery<APITypes.ListUsersQueryVariables, APITypes.ListUsersQuery>;

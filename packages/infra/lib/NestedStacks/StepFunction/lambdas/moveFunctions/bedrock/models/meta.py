@@ -6,12 +6,6 @@ bedrock_runtime = boto3.client("bedrock-runtime")
 
 logger = Logger()
 
-system_prompts = [
-    {
-        "text": "You are a chess player who's goal is to win the game, when presented with context your goal is to use the context to suggest the next best move to eventually win the game if not in the next move"
-    }
-]
-
 
 def meta(board, model_id, tries, message_attempts):
 
@@ -91,61 +85,10 @@ Keep the justification clear and concise in 1-2 sentences.""",
 
     logger.info({"Input": messages})
 
-    # try:
-    #     response = bedrock_runtime.converse(
-    #         modelId=model_id,
-    #         messages=messages,
-    #         system=system_prompts,
-    #         toolConfig={
-    #             "tools": [
-    #                 {
-    #                     "toolSpec": {
-    #                         "name": "chess_move",
-    #                         "description": "Prints the next best move to make in SAN notation and justification as to why this is the best move.",
-    #                         "inputSchema": {
-    #                             "json": {
-    #                                 "type": "object",
-    #                                 "properties": {
-    #                                     "next_move": {
-    #                                         "type": "string",
-    #                                         "description": "The next best move to make providing only the SAN notation.",
-    #                                     },
-    #                                     "justification": {
-    #                                         "type": "string",
-    #                                         "description": "A short justification as to why this is the best move.",
-    #                                     },
-    #                                 },
-    #                                 "required": ["next_move", "justification"],
-    #                             }
-    #                         },
-    #                     }
-    #                 }
-    #             ],
-    #         },
-    #     )
-
-    #     logger.info({"Output": response})
-    #     params = response["output"]["message"]["content"][0]["toolUse"]["input"]
-
-    #     messages.append(
-    #         {
-    #             "role": "assistant",
-    #             "content": [
-    #                 {
-    #                     "text": f"MOVE: {params['next_move']}\nJUSTIFICATION: {params['justification']}"
-    #                 }
-    #             ],
-    #         }
-    #     )
-
-    #     return (params["next_move"], params["justification"], messages)
-    # except bedrock_runtime.exceptions.ValidationException as e:
-    #     if "This model doesn't support tool use" in str(e):
-    #         logger.info("Model doesn't support tools, retrying without tools")
-
     # Retry without tools
     response = bedrock_runtime.converse(
-        modelId=model_id, messages=messages, system=system_prompts
+        modelId=model_id,
+        messages=messages,
     )
     logger.info({"Output": response})
     messages.append(response["output"]["message"])

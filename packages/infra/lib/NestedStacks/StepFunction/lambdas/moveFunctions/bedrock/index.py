@@ -92,9 +92,8 @@ def predict_next_move(model_id, san_list, board):
                     board, model_id, tries, message_attempts
                 )
             case "cohere":
-                next_move, justification, message_attempts = cohere(
-                    board, model_id, tries, message_attempts
-                )
+                next_move, justification = cohere(board, model_id, tries)
+                message_attempts = []
             case "meta":
                 next_move, justification, message_attempts = meta(
                     board, model_id, tries, message_attempts
@@ -112,7 +111,7 @@ def predict_next_move(model_id, san_list, board):
             logger.info(
                 {"Tries": tries + 1, "Move": next_move, "Justification": justification}
             )
-            return (next_move, justification, message_attempts)
+            return (next_move, f"{justification} {tries+1}", message_attempts)
         except Exception as e:
             logger.info({"Error": e})
 
@@ -146,6 +145,6 @@ Keep the justification clear and concise in 1-2 sentences.""",
     )
     response_text = response["output"]["message"]["content"][0]["text"]
 
-    justification = "Helper(Base) - " + response_text
+    justification = response_text + " 4"
 
     return (stockfish_move, justification, message_attempts)

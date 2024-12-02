@@ -6,15 +6,8 @@ bedrock_runtime = boto3.client("bedrock-runtime")
 
 logger = Logger()
 
-system_prompts = [
-    {
-        "text": "You are a chess player who's goal is to win the game, when presented with context your goal is to use the context to suggest the next best move to eventually win the game if not in the next move"
-    }
-]
 
-
-def cohere(board, model_id, tries, message_attempts):
-
+def cohere(board, model_id, tries):
     match tries:
         case 0:
             messages = [
@@ -42,8 +35,7 @@ Keep the justification clear and concise in 1-2 sentences.""",
                 },
             ]
         case 1:
-            messages = message_attempts
-            messages.append(
+            messages = [
                 {
                     "role": "user",
                     "content": [
@@ -59,10 +51,8 @@ Keep the justification clear and concise in 1-2 sentences.""",
                         },
                     ],
                 }
-            )
+            ]
         case 2:
-            messages = message_attempts
-
             legal_moves = list(board.legal_moves)
             san_moves = []
 
@@ -70,7 +60,7 @@ Keep the justification clear and concise in 1-2 sentences.""",
                 san_move = board.san(move)
                 san_moves.append(san_move)
 
-            messages.append(
+            messages = [
                 {
                     "role": "user",
                     "content": [
@@ -85,7 +75,7 @@ Keep the justification clear and concise in 1-2 sentences.""",
                         },
                     ],
                 }
-            )
+            ]
         case _:
             raise Exception("Max tries reached")
 
@@ -95,7 +85,6 @@ Keep the justification clear and concise in 1-2 sentences.""",
         response = bedrock_runtime.converse(
             modelId=model_id,
             messages=messages,
-            system=system_prompts,
             toolConfig={
                 "tools": [
                     {
@@ -128,26 +117,13 @@ Keep the justification clear and concise in 1-2 sentences.""",
         logger.info({"Output": response})
         params = response["output"]["message"]["content"][0]["toolUse"]["input"]
 
-        messages.append(
-            {
-                "role": "assistant",
-                "content": [
-                    {
-                        "text": f"MOVE: {params['next_move']}\nJUSTIFICATION: {params['justification']}"
-                    }
-                ],
-            }
-        )
-
-        return (params["next_move"], params["justification"], messages)
+        return (params["next_move"], params["justification"])
     except bedrock_runtime.exceptions.ValidationException as e:
         if "This model doesn't support tool use" in str(e):
             logger.info("Model doesn't support tools, retrying without tools")
 
             # Retry without tools
-            response = bedrock_runtime.converse(
-                modelId=model_id, messages=messages, system=system_prompts
-            )
+            response = bedrock_runtime.converse(modelId=model_id, messages=messages)
             logger.info({"Output": response})
             messages.append(response["output"]["message"])
 
@@ -165,9 +141,9 @@ Keep the justification clear and concise in 1-2 sentences.""",
                 next_move = move_line.split("MOVE:")[1].strip()
                 justification = justification_line.split("JUSTIFICATION:")[1].strip()
 
-                return (next_move, justification, messages)
+                return (next_move, justification)
             except Exception as parse_error:
                 logger.error(f"Error parsing response: {parse_error}")
-                return ("ERROR", "ERROR", messages)
+                return ("ERROR", "ERROR")
         else:
             raise

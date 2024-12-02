@@ -407,6 +407,13 @@ export type ListCommentsQuery = {
   } | null > | null,
 };
 
+export type ListUsersQueryVariables = {
+};
+
+export type ListUsersQuery = {
+  listUsers?: string | null,
+};
+
 export type OnCreateSessionSubscriptionVariables = {
   SessionID?: string | null,
   SK?: string | null,

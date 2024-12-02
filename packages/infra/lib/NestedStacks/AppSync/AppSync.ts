@@ -51,7 +51,10 @@ export class AppSync extends Construct {
         ],
       },
 
-      environmentVariables: { TABLE_NAME: ddbTable.tableName },
+      environmentVariables: {
+        TABLE_NAME: ddbTable.tableName,
+        CONGITO_USER_POOL: userPool.userPoolId,
+      },
 
       logConfig: {
         fieldLogLevel: appsync.FieldLogLevel.ALL,
@@ -75,6 +78,7 @@ export class AppSync extends Construct {
     new UnitResolvers(this, "Unit Resolvers", {
       ddbDataSource,
       graphqlApi: this.graphqlApi,
+      userPool,
     });
 
     /********************************************************************/

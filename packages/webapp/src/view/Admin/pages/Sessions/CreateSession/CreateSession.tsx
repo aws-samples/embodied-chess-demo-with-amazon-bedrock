@@ -143,6 +143,7 @@ export const CreateSession = (props: ICreateSession) => {
                   description="Defaults to no background if none selected"
                 >
                   <Select
+                    disabled={isPending}
                     selectedOption={value}
                     onChange={({ detail }) => onChange(detail.selectedOption)}
                     options={getBgSrc.data.map((src) => ({

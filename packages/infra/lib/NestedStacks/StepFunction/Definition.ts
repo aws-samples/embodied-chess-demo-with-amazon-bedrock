@@ -193,7 +193,7 @@ export class Definition extends Construct {
       entry: path.join(__dirname, "lambdas", "moveFunctions", "bedrock"),
       runtime: lambda.Runtime.PYTHON_3_12,
       timeout: cdk.Duration.minutes(1),
-      memorySize: 1024,
+      memorySize: 10240,
       environment: {
         GRAPHQL_URL: graphqlApi.graphqlUrl,
       },
@@ -234,80 +234,76 @@ export class Definition extends Construct {
     );
     graphqlApi.grantMutation(importModelsMove);
 
-    const chessEngineMove = new NodejsFunction(self, "Chess Engine Move", {
-      entry: path.join(
-        __dirname,
-        "lambdas",
-        "moveFunctions",
-        "chessEngine",
-        "index.ts"
-      ),
-      runtime: lambda.Runtime.NODEJS_20_X,
-      timeout: cdk.Duration.minutes(1),
-      bundling: {
-        nodeModules: ["js-chess-engine"],
-      },
-    });
+    const chessEngineMove = new python.PythonFunction(
+      self,
+      "Chess Engine Move",
+      {
+        entry: path.join(__dirname, "lambdas", "moveFunctions", "chessEngine"),
+        runtime: lambda.Runtime.PYTHON_3_12,
+        layers: [stockfishLayer, pythonPowertools],
+        timeout: cdk.Duration.minutes(1),
+        memorySize: 10240,
+      }
+    );
 
     this.definition = new sfn.Pass(self, "Clean Up Input", {
       inputPath: "$.[0]",
     }).next(
-      new sfn.Parallel(self, "Execute Move")
-        .branch(
-          new tasks.DynamoGetItem(self, "Get Session", {
+      new tasks.DynamoGetItem(self, "Get Session", {
+        table: ddbTable,
+        key: {
+          SessionID: tasks.DynamoAttributeValue.fromString(
+            sfn.JsonPath.stringAt("$.SessionID")
+          ),
+          SK: tasks.DynamoAttributeValue.fromString("SESSION"),
+        },
+        resultSelector: { Item: sfn.JsonPath.stringAt("$.Item") },
+        resultPath: "$.Session",
+      })
+        .next(
+          new tasks.DynamoGetItem(self, "Get Latest Move", {
             table: ddbTable,
             key: {
               SessionID: tasks.DynamoAttributeValue.fromString(
                 sfn.JsonPath.stringAt("$.SessionID")
               ),
-              SK: tasks.DynamoAttributeValue.fromString("SESSION"),
+              SK: tasks.DynamoAttributeValue.fromString("MOVE#LATEST"),
             },
             resultSelector: { Item: sfn.JsonPath.stringAt("$.Item") },
-            resultPath: "$.Session",
+            resultPath: "$.LatestMove",
           })
-            .next(
-              new tasks.DynamoGetItem(self, "Get Latest Move", {
-                table: ddbTable,
-                key: {
-                  SessionID: tasks.DynamoAttributeValue.fromString(
-                    sfn.JsonPath.stringAt("$.SessionID")
-                  ),
-                  SK: tasks.DynamoAttributeValue.fromString("MOVE#LATEST"),
-                },
-                resultSelector: { Item: sfn.JsonPath.stringAt("$.Item") },
-                resultPath: "$.LatestMove",
+        )
+        .next(
+          new sfn.Choice(self, "Is GamePlay Valid?", {
+            comment: "Is the call for a move allowed to proceed",
+          })
+            .when(
+              sfn.Condition.not(
+                sfn.Condition.stringEquals(
+                  "$.Session.Item.GameStatus.S",
+                  "PLAYING"
+                )
+              ),
+              new sfn.Fail(self, "GameStatus !== PLAYING", {
+                error: "GAMESTATUS_NOT_PLAYING",
+                cause: JSON.stringify({
+                  message: "Game is inactive. Click start to make it active.",
+                }),
               })
             )
-            .next(
-              new sfn.Choice(self, "Is GamePlay Valid?", {
-                comment: "Is the call for a move allowed to proceed",
+            .when(
+              sfn.Condition.isPresent("$.LatestMove.Item.SfnExecutionId.S"),
+              new sfn.Fail(self, "Move Already In Progress", {
+                error: "MOVE_ALREADY_IN_PROGRESS",
+                cause: JSON.stringify({
+                  message:
+                    "Another State Machine is currently handling this move, please refer to the move record to see which state machine this is",
+                }),
               })
-                .when(
-                  sfn.Condition.not(
-                    sfn.Condition.stringEquals(
-                      "$.Session.Item.GameStatus.S",
-                      "PLAYING"
-                    )
-                  ),
-                  new sfn.Fail(self, "GameStatus !== PLAYING", {
-                    error: "GAMESTATUS_NOT_PLAYING",
-                    cause: JSON.stringify({
-                      message:
-                        "Game is inactive. Click start to make it active.",
-                    }),
-                  })
-                )
-                .when(
-                  sfn.Condition.isPresent("$.LatestMove.Item.SfnExecutionId.S"),
-                  new sfn.Fail(self, "Move Already In Progress", {
-                    error: "MOVE_ALREADY_IN_PROGRESS",
-                    cause: JSON.stringify({
-                      message:
-                        "Another State Machine is currently handling this move, please refer to the move record to see which state machine this is",
-                    }),
-                  })
-                )
-                .otherwise(
+            )
+            .otherwise(
+              new sfn.Parallel(self, "Execute Move")
+                .branch(
                   (startIoTSessionTask
                     ? new sfn.Choice(self, "Initialise Board?", {
                         comment: "Only perform this once to init the board",
@@ -456,15 +452,15 @@ export class Definition extends Construct {
                         )
                     )
                 )
+                .addCatch(
+                  new tasks.LambdaInvoke(self, "Catch Error", {
+                    lambdaFunction: catchError,
+                  }),
+                  {
+                    resultPath: sfn.JsonPath.stringAt("$.ErrorInfo"),
+                  }
+                )
             )
-        )
-        .addCatch(
-          new tasks.LambdaInvoke(self, "Catch Error", {
-            lambdaFunction: catchError,
-          }),
-          {
-            resultPath: sfn.JsonPath.stringAt("$.ErrorInfo"),
-          }
         )
     );
   }

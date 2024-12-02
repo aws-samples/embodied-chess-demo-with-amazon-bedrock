@@ -30,7 +30,9 @@ JUSTIFICATION: This is a sample explanation for the move e4.
 MOVE: Nf3
 JUSTIFICATION: This is a sample explanation for the move e4.
 
-Keep the justification clear and concise in 1-2 sentences.""",
+Keep the justification clear and concise in 1-2 sentences.
+
+You will always use the tool named, if it's available to you: 'chess_move'""",
                         },
                     ],
                 },
@@ -49,7 +51,9 @@ Provide me another Standard Algebraic Notation (SAN) move that is legal and expl
 MOVE: [SAN notation]
 JUSTIFICATION: [Your explanation]
 
-Keep the justification clear and concise in 1-2 sentences.""",
+Keep the justification clear and concise in 1-2 sentences.
+
+You will always use the tool named, if it's available to you: 'chess_move'""",
                         },
                     ],
                 }
@@ -75,7 +79,9 @@ Select a Standard Algebraic Notation (SAN) only from this list {san_moves} and e
 MOVE: [SAN notation]
 JUSTIFICATION: [Your explanation]
 
-Keep the justification clear and concise in 1-2 sentences.""",
+Keep the justification clear and concise in 1-2 sentences.
+
+You will always use the tool named, if it's available to you: 'chess_move'""",
                         },
                     ],
                 }
@@ -114,12 +120,36 @@ Keep the justification clear and concise in 1-2 sentences.""",
                         }
                     }
                 ],
-                "toolChoice": {"tool": {"name": "chess_move"}},
             },
         )
 
         logger.info({"Output": response})
-        params = response["output"]["message"]["content"][0]["toolUse"]["input"]
+        if response["stopReason"] == "end_turn":
+            messages.append(response["output"]["message"])
+
+            # Parse the response text to extract move and justification
+            response_text = response["output"]["message"]["content"][0]["text"]
+
+            try:
+                lines = [
+                    line.strip() for line in response_text.split("\n") if line.strip()
+                ]
+
+                move_line = find(lines, lambda x: "MOVE:" in x)
+                justification_line = find(lines, lambda x: "JUSTIFICATION:" in x)
+
+                next_move = move_line.split("MOVE:")[1].strip()
+                justification = justification_line.split("JUSTIFICATION:")[1].strip()
+
+                return (next_move, justification, messages)
+            except Exception as parse_error:
+                logger.error(f"Error parsing response: {parse_error}")
+                return ("ERROR", "ERROR", messages)
+
+        elif response["stopReason"] == "tool_use":
+            params = response["output"]["message"]["content"][0]["toolUse"]["input"]
+        else:
+            raise Exception(f"Unknown stop reason {response['stopReason']}")
 
         messages.append(
             {
@@ -165,3 +195,7 @@ Keep the justification clear and concise in 1-2 sentences.""",
                 return ("ERROR", "ERROR", messages)
         else:
             raise
+    except Exception as e:
+        logger.error(f"Error in Mistral: {e}")
+        messages.pop()
+        return ("ERROR", "ERROR", messages)
