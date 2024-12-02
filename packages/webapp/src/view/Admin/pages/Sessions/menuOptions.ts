@@ -9,12 +9,6 @@ export const gameOptions = [
   { label: "Random", value: "random" },
 ];
 
-export const chessEngineOptions = [
-  { label: "Beginner", value: "ChessEngine-0" },
-  { label: "Intermediate", value: "ChessEngine-1" },
-  { label: "Advanced", value: "ChessEngine-2" },
-];
-
 export const transformModelOptions = (data: FoundationModelSummary[]) => {
   const grouped = groupBy(data, "providerName");
 

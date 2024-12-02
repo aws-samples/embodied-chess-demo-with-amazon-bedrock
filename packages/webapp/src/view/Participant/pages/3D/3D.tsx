@@ -231,7 +231,7 @@ export const ThreeDimensional = () => {
                         style={{ borderRadius: "0 0 16px 16px" }}
                         camera={{ position: [-5, 4, 8], fov: 50 }}
                       >
-                        <Environment background blur={0.67} />
+                        <Environment background files="venice_sunset_1k.hdr" />
                         <ThreeChessBoard autoRotate latestMove={latestMove} />
                       </Canvas>
                     </BoardItem>

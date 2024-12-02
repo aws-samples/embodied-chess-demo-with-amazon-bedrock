@@ -1,7 +1,7 @@
 {
   "name": "embodied-chess-demo-with-amazon-bedrock",
   "version": "1.0.0",
-  "author": "Patrick O'Connor <ocopatr@amazon.com>",
+  "author": "Patrick O'Connor",
   "description": "Deploy a virtual or robot arm controlled game of chess using AWS AI/IoT services.",
   "license": "Apache-2.0",
   "scripts": {

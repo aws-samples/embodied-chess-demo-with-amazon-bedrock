@@ -2,6 +2,7 @@ import {
   getLatestMove,
   listActiveSessions,
   listGamesByMoveCount,
+  listUsers,
 } from "../../../graphql/queries";
 
 import {
@@ -133,6 +134,23 @@ export const useGetBgSrc = () => {
       });
 
       return items;
+    },
+  });
+};
+
+/*****************************************************************/
+/*************************** listUsers ***************************/
+/*****************************************************************/
+
+export const useListUsers = () => {
+  return useQuery({
+    queryKey: ["listUsers"],
+    queryFn: async () => {
+      const { data } = await client.graphql({
+        query: listUsers,
+      });
+
+      return JSON.parse(data.listUsers);
     },
   });
 };

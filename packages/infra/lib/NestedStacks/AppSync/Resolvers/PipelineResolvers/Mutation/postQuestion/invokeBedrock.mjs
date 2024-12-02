@@ -9,7 +9,7 @@ export const request = (ctx) => {
         role: "user",
         content: [
           {
-            text: `Your task is to best advise on a chess game denoted by the following Forsyth-Edwards Notation (FEN): ${Board}. Answer the question as best you can.`,
+            text: `Your task is to best advise on a chess game denoted by the following Forsyth-Edwards Notation (FEN): ${Board}. Answer the question as best you can and make it short and sharp.`,
           },
           {
             text: Comment,
