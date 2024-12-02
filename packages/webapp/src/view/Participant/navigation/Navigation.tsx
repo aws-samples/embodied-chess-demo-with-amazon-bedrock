@@ -1,19 +1,27 @@
 import { connectionStatusAtom, navHeightPxAtom } from "../../../common/atom";
-import { useIsAdmin, useUserAttributes } from "../../../common/api";
-import { StatusIndicator, TopNavigation } from "@cloudscape-design/components";
-import { sessionCookieName } from "../../../common/constant";
 import { ConnectionStatusColor, GameStatusColor } from "../utils/utils";
-import { useGetSession } from "../api/queries";
+import { useIsAdmin, useUserAttributes } from "../../../common/api";
 import { NavigateFunction, useNavigate } from "react-router-dom";
+import { sessionCookieName } from "../../../common/constant";
+import { useEffect, useRef, useState } from "react";
+import { useGetSession } from "../api/queries";
 import { signOut } from "aws-amplify/auth";
 import { useCookies } from "react-cookie";
-import { useEffect, useRef } from "react";
 import { capitalize } from "lodash";
 import { useAtom } from "jotai";
 
+import {
+  Box,
+  Button,
+  Modal,
+  StatusIndicator,
+  TopNavigation,
+} from "@cloudscape-design/components";
+
 export const Navigation = () => {
   const [connectionStatus] = useAtom(connectionStatusAtom);
-  const [cookies] = useCookies([sessionCookieName]);
+  const [cookies, , remove] = useCookies([sessionCookieName]);
+
   const navigate = useNavigate();
 
   const session = useGetSession(cookies.GenAIChessDemoSessionID);
@@ -21,6 +29,7 @@ export const Navigation = () => {
   const ref = useRef<HTMLDivElement>(null);
   const isAdmin = useIsAdmin();
 
+  const [switchSession, setSwitchSession] = useState(false);
   const [, setNavHeight] = useAtom(navHeightPxAtom);
 
   useEffect(() => {
@@ -37,6 +46,7 @@ export const Navigation = () => {
                 {
                   type: "button",
                   text: `Session: ${cookies.GenAIChessDemoSessionID}`,
+                  onClick: () => setSwitchSession(true),
                 },
                 {
                   type: "button",
@@ -164,6 +174,28 @@ export const Navigation = () => {
               ]
         }
       />
+      <Modal
+        onDismiss={() => setSwitchSession(false)}
+        visible={switchSession}
+        footer={
+          <Box float="right">
+            <Button
+              variant="primary"
+              onClick={() => {
+                remove("GenAIChessDemoSessionID", {
+                  path: "/",
+                });
+                setSwitchSession(false);
+              }}
+            >
+              Change Session
+            </Button>
+          </Box>
+        }
+        header={`Session: ${cookies.GenAIChessDemoSessionID} `}
+      >
+        Would you like to log out of this session and switch into another?
+      </Modal>
     </div>
   );
 };
