@@ -134,7 +134,7 @@ export const PlayerConfiguration = (props: IPlayerConfiguration) => {
                                   ? "loading"
                                   : "finished"
                               }
-                              options={listUsers.data.map((user) => {
+                              options={listUsers.data?.map((user) => {
                                 return {
                                   label: user,
                                   value: user,
@@ -205,7 +205,7 @@ export const PlayerConfiguration = (props: IPlayerConfiguration) => {
                                     ? "loading"
                                     : "finished"
                                 }
-                                options={importedModels.data.map(
+                                options={importedModels.data?.map(
                                   ({ modelName, modelArn }) => {
                                     return {
                                       label: modelName,

@@ -146,7 +146,7 @@ export const CreateSession = (props: ICreateSession) => {
                     disabled={isPending}
                     selectedOption={value}
                     onChange={({ detail }) => onChange(detail.selectedOption)}
-                    options={getBgSrc.data.map((src) => ({
+                    options={getBgSrc.data?.map((src) => ({
                       label: src.path.slice(12),
                       value: src.path,
                     }))}
